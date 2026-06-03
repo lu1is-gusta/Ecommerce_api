@@ -27,5 +27,8 @@ coverage/
 *.mdf
 *.ldf
 
+## Scratch files
+build_output.txt
+
 .cursor/
 docs/
