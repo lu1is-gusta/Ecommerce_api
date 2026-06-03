@@ -21,7 +21,7 @@ public class ProductRepository : IProductRepository
             .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
-    public async Task<IReadOnlyList<Product>> ListAsync(ProductFilter filter, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<Product>> ListAsync(ProductFilter filter, CancellationToken cancellationToken = default)
     {
         IQueryable<Product> query = _context.Products.AsNoTracking();
 
@@ -36,7 +36,13 @@ public class ProductRepository : IProductRepository
 
         query = query.OrderBy(p => p.Name);
 
-        return await query.ToListAsync(cancellationToken);
+        var totalCount = await query.CountAsync(cancellationToken);
+        var items = await query
+            .Skip((filter.Page - 1) * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToListAsync(cancellationToken);
+
+        return new PagedResult<Product>(items, filter.Page, filter.PageSize, totalCount);
     }
 
     public async Task AddAsync(Product product, CancellationToken cancellationToken = default)

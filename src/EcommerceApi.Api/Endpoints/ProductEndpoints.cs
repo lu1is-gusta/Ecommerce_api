@@ -27,8 +27,8 @@ public static class ProductEndpoints
 
         group.MapGet("/", GetProducts)
             .WithName("GetProducts")
-            .WithSummary("Lists products, optionally filtered by name and price range.")
-            .Produces<IReadOnlyList<ProductResponse>>();
+            .WithSummary("Lists products, optionally filtered by name and price range. Supports pagination via page and pageSize.")
+            .Produces<PagedResult<ProductResponse>>();
 
         group.MapGet("/{id:guid}", GetProductById)
             .WithName("GetProductById")

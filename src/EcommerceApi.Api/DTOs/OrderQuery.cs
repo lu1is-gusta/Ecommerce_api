@@ -12,12 +12,21 @@ public class OrderQuery
     public Guid? BuyerId { get; set; }
     public DateTime? From { get; set; }
     public DateTime? To { get; set; }
+    public int? Page { get; set; }
+    public int? PageSize { get; set; }
 
-    public OrderFilter ToFilter() => new()
+    public OrderFilter ToFilter()
     {
-        Status = Status,
-        BuyerId = BuyerId,
-        From = From,
-        To = To
-    };
+        var page = Page ?? 1;
+        var pageSize = PageSize ?? 20;
+        return new()
+        {
+            Status = Status,
+            BuyerId = BuyerId,
+            From = From,
+            To = To,
+            Page = page < 1 ? 1 : page,
+            PageSize = pageSize < 1 ? 1 : pageSize > 100 ? 100 : pageSize,
+        };
+    }
 }

@@ -83,10 +83,12 @@ public class BuyerEndpointsTests : IClassFixture<EcommerceApiFactory>
         var created = await (await _client.PostAsJsonAsync("/api/v1/buyers", BuildCreatePayload("List Test", "listtest@example.com")))
             .Content.ReadFromJsonAsync<BuyerResponse>();
 
-        var buyers = await _client.GetFromJsonAsync<List<BuyerResponse>>("/api/v1/buyers");
+        var paged = await _client.GetFromJsonAsync<PagedResult<BuyerResponse>>("/api/v1/buyers");
 
-        Assert.NotNull(buyers);
-        Assert.Contains(buyers!, b => b.Id == created!.Id);
+        Assert.NotNull(paged);
+        Assert.Contains(paged!.Items, b => b.Id == created!.Id);
+        Assert.True(paged.TotalCount > 0);
+        Assert.Equal(1, paged.Page);
     }
 
     [Fact]

@@ -8,4 +8,6 @@ public class ProductFilter
     public string? Name { get; init; }
     public decimal? MinPrice { get; init; }
     public decimal? MaxPrice { get; init; }
+    public int Page { get; init; } = 1;
+    public int PageSize { get; init; } = 20;
 }

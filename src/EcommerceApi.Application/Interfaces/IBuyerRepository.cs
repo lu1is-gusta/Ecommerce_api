@@ -7,7 +7,7 @@ public interface IBuyerRepository
 {
     Task<Buyer?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyList<Buyer>> ListAsync(BuyerFilter filter, CancellationToken cancellationToken = default);
+    Task<PagedResult<Buyer>> ListAsync(BuyerFilter filter, CancellationToken cancellationToken = default);
 
     Task AddAsync(Buyer buyer, CancellationToken cancellationToken = default);
 

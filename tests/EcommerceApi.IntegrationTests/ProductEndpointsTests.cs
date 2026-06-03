@@ -78,12 +78,14 @@ public class ProductEndpointsTests : IClassFixture<EcommerceApiFactory>
     [Fact]
     public async Task List_returns_seeded_products()
     {
-        var products = await _client.GetFromJsonAsync<List<ProductResponse>>("/api/v1/products");
+        var paged = await _client.GetFromJsonAsync<PagedResult<ProductResponse>>("/api/v1/products");
 
-        Assert.NotNull(products);
-        Assert.Contains(products!, p => p.Id == SeedIds.Keyboard);
-        Assert.Contains(products!, p => p.Id == SeedIds.Mouse);
-        Assert.Contains(products!, p => p.Id == SeedIds.Monitor);
+        Assert.NotNull(paged);
+        Assert.Contains(paged!.Items, p => p.Id == SeedIds.Keyboard);
+        Assert.Contains(paged.Items, p => p.Id == SeedIds.Mouse);
+        Assert.Contains(paged.Items, p => p.Id == SeedIds.Monitor);
+        Assert.True(paged.TotalCount >= 3);
+        Assert.Equal(1, paged.Page);
     }
 
     [Fact]

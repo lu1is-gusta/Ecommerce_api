@@ -21,7 +21,7 @@ public class BuyerRepository : IBuyerRepository
             .FirstOrDefaultAsync(b => b.Id == id, cancellationToken);
     }
 
-    public async Task<IReadOnlyList<Buyer>> ListAsync(BuyerFilter filter, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<Buyer>> ListAsync(BuyerFilter filter, CancellationToken cancellationToken = default)
     {
         IQueryable<Buyer> query = _context.Buyers.AsNoTracking();
 
@@ -33,7 +33,13 @@ public class BuyerRepository : IBuyerRepository
 
         query = query.OrderBy(b => b.Name);
 
-        return await query.ToListAsync(cancellationToken);
+        var totalCount = await query.CountAsync(cancellationToken);
+        var items = await query
+            .Skip((filter.Page - 1) * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToListAsync(cancellationToken);
+
+        return new PagedResult<Buyer>(items, filter.Page, filter.PageSize, totalCount);
     }
 
     public async Task AddAsync(Buyer buyer, CancellationToken cancellationToken = default)

@@ -12,9 +12,13 @@ public class GetBuyersUseCase
         _repository = repository;
     }
 
-    public async Task<IReadOnlyList<BuyerResponse>> ExecuteAsync(BuyerFilter filter, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<BuyerResponse>> ExecuteAsync(BuyerFilter filter, CancellationToken cancellationToken = default)
     {
-        var buyers = await _repository.ListAsync(filter, cancellationToken);
-        return buyers.Select(b => b.ToResponse()).ToList();
+        var paged = await _repository.ListAsync(filter, cancellationToken);
+        return new PagedResult<BuyerResponse>(
+            paged.Items.Select(b => b.ToResponse()).ToList(),
+            paged.Page,
+            paged.PageSize,
+            paged.TotalCount);
     }
 }

@@ -27,8 +27,8 @@ public static class BuyerEndpoints
 
         group.MapGet("/", GetBuyers)
             .WithName("GetBuyers")
-            .WithSummary("Lists buyers, optionally filtered by name and email.")
-            .Produces<IReadOnlyList<BuyerResponse>>();
+            .WithSummary("Lists buyers, optionally filtered by name and email. Supports pagination via page and pageSize.")
+            .Produces<PagedResult<BuyerResponse>>();
 
         group.MapGet("/{id:guid}", GetBuyerById)
             .WithName("GetBuyerById")

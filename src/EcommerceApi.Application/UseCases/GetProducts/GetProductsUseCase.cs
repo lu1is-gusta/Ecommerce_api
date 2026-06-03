@@ -12,9 +12,13 @@ public class GetProductsUseCase
         _repository = repository;
     }
 
-    public async Task<IReadOnlyList<ProductResponse>> ExecuteAsync(ProductFilter filter, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<ProductResponse>> ExecuteAsync(ProductFilter filter, CancellationToken cancellationToken = default)
     {
-        var products = await _repository.ListAsync(filter, cancellationToken);
-        return products.Select(p => p.ToResponse()).ToList();
+        var paged = await _repository.ListAsync(filter, cancellationToken);
+        return new PagedResult<ProductResponse>(
+            paged.Items.Select(p => p.ToResponse()).ToList(),
+            paged.Page,
+            paged.PageSize,
+            paged.TotalCount);
     }
 }
