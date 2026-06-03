@@ -65,6 +65,7 @@ try
     {
         options.SwaggerDoc("v1", new OpenApiInfo { Title = "Ecommerce API", Version = "v1" });
         options.SchemaFilter<StringEnumSchemaFilter>();
+        options.DocumentFilter<HealthChecksDocumentFilter>();
         options.DocInclusionPredicate((docName, apiDesc) =>
         {
             var hasVersionMetadata = apiDesc.ActionDescriptor.EndpointMetadata
