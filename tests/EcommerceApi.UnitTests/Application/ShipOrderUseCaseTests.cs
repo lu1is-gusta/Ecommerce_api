@@ -2,6 +2,7 @@ using EcommerceApi.Application.Exceptions;
 using EcommerceApi.Application.Interfaces;
 using EcommerceApi.Application.UseCases.ShipOrder;
 using EcommerceApi.Domain.Entities;
+using EcommerceApi.Domain.Exceptions;
 using Moq;
 using Xunit;
 
@@ -32,6 +33,51 @@ public class ShipOrderUseCaseTests
 
         Assert.Equal("Shipped", response.Status);
         _repository.Verify(r => r.UpdateAsync(order, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task Throws_domain_exception_when_order_is_started()
+    {
+        var order = new Order(new Buyer("Jane", "jane@example.com"),
+            new[] { new OrderItem(Guid.NewGuid(), 10m, 1) });
+
+        _repository
+            .Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(order);
+
+        await Assert.ThrowsAsync<DomainException>(() => _useCase.ExecuteAsync(order.Id));
+        _repository.Verify(r => r.UpdateAsync(order, It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Throws_domain_exception_when_order_is_already_shipped()
+    {
+        var order = new Order(new Buyer("Jane", "jane@example.com"),
+            new[] { new OrderItem(Guid.NewGuid(), 10m, 1) });
+        order.Process();
+        order.Ship();
+
+        _repository
+            .Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(order);
+
+        await Assert.ThrowsAsync<DomainException>(() => _useCase.ExecuteAsync(order.Id));
+        _repository.Verify(r => r.UpdateAsync(order, It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Throws_domain_exception_when_order_is_cancelled()
+    {
+        var order = new Order(new Buyer("Jane", "jane@example.com"),
+            new[] { new OrderItem(Guid.NewGuid(), 10m, 1) });
+        order.Cancel();
+
+        _repository
+            .Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(order);
+
+        await Assert.ThrowsAsync<DomainException>(() => _useCase.ExecuteAsync(order.Id));
+        _repository.Verify(r => r.UpdateAsync(order, It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
