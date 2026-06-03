@@ -30,8 +30,8 @@ public static class OrderEndpoints
 
         group.MapGet("/", GetOrders)
             .WithName("GetOrders")
-            .WithSummary("Lists orders, optionally filtered by status, buyer and creation date range.")
-            .Produces<IReadOnlyList<OrderResponse>>();
+            .WithSummary("Lists orders, optionally filtered by status, buyer and creation date range. Supports pagination via page and pageSize.")
+            .Produces<PagedResult<OrderResponse>>();
 
         group.MapGet("/{id:guid}", GetOrderById)
             .WithName("GetOrderById")

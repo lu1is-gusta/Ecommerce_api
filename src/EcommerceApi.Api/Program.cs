@@ -1,5 +1,7 @@
+using System.Text.Json.Serialization;
 using Asp.Versioning;
 using EcommerceApi.Api.Endpoints;
+using EcommerceApi.Api.Infrastructure.OpenApi;
 using EcommerceApi.Api.Middleware;
 using EcommerceApi.Application;
 using EcommerceApi.Infrastructure;
@@ -35,10 +37,14 @@ builder.Services.AddApiVersioning(options =>
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
+builder.Services.ConfigureHttpJsonOptions(options =>
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "Ecommerce API", Version = "v1" });
+    options.SchemaFilter<StringEnumSchemaFilter>();
 });
 
 var app = builder.Build();
@@ -57,6 +63,8 @@ var versionSet = app.NewApiVersionSet()
     .Build();
 
 app.MapOrderEndpoints(versionSet);
+app.MapProductEndpoints(versionSet);
+app.MapBuyerEndpoints(versionSet);
 
 if (!app.Environment.IsEnvironment("Testing"))
 {

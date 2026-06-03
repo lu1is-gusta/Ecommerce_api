@@ -24,7 +24,7 @@ public class OrderRepository : IOrderRepository
             .FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
     }
 
-    public async Task<IReadOnlyList<Order>> ListAsync(OrderFilter filter, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<Order>> ListAsync(OrderFilter filter, CancellationToken cancellationToken = default)
     {
         IQueryable<Order> query = _context.Orders
             .AsNoTracking()
@@ -46,7 +46,13 @@ public class OrderRepository : IOrderRepository
 
         query = query.OrderByDescending(o => o.CreatedAt);
 
-        return await query.ToListAsync(cancellationToken);
+        var totalCount = await query.CountAsync(cancellationToken);
+        var items = await query
+            .Skip((filter.Page - 1) * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToListAsync(cancellationToken);
+
+        return new PagedResult<Order>(items, filter.Page, filter.PageSize, totalCount);
     }
 
     public async Task AddAsync(Order order, CancellationToken cancellationToken = default)

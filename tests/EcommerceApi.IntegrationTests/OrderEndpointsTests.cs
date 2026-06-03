@@ -79,13 +79,15 @@ public class OrderEndpointsTests : IClassFixture<EcommerceApiFactory>
         var created = await (await _client.PostAsJsonAsync("/api/v1/orders", BuildCreatePayload()))
             .Content.ReadFromJsonAsync<OrderResponse>();
 
-        var all = await _client.GetFromJsonAsync<List<OrderResponse>>("/api/v1/orders");
+        var all = await _client.GetFromJsonAsync<PagedResult<OrderResponse>>("/api/v1/orders");
         Assert.NotNull(all);
-        Assert.Contains(all!, o => o.Id == created!.Id);
+        Assert.Contains(all!.Items, o => o.Id == created!.Id);
+        Assert.True(all.TotalCount > 0);
+        Assert.Equal(1, all.Page);
 
-        var started = await _client.GetFromJsonAsync<List<OrderResponse>>("/api/v1/orders?status=Started");
+        var started = await _client.GetFromJsonAsync<PagedResult<OrderResponse>>("/api/v1/orders?status=Started");
         Assert.NotNull(started);
-        Assert.All(started!, o => Assert.Equal("Started", o.Status));
+        Assert.All(started!.Items, o => Assert.Equal("Started", o.Status));
     }
 
     [Fact]

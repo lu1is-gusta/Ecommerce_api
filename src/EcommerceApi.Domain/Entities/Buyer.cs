@@ -23,4 +23,15 @@ public class Buyer
         Name = name.Trim();
         Email = email.Trim();
     }
+
+    public void Update(string name, string email)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new DomainException("Buyer name is required.");
+        if (string.IsNullOrWhiteSpace(email))
+            throw new DomainException("Buyer email is required.");
+
+        Name = name.Trim();
+        Email = email.Trim();
+    }
 }

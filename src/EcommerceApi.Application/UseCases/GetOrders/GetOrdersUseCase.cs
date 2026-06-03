@@ -12,9 +12,13 @@ public class GetOrdersUseCase
         _repository = repository;
     }
 
-    public async Task<IReadOnlyList<OrderResponse>> ExecuteAsync(OrderFilter filter, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<OrderResponse>> ExecuteAsync(OrderFilter filter, CancellationToken cancellationToken = default)
     {
-        var orders = await _repository.ListAsync(filter, cancellationToken);
-        return orders.Select(o => o.ToResponse()).ToList();
+        var paged = await _repository.ListAsync(filter, cancellationToken);
+        return new PagedResult<OrderResponse>(
+            paged.Items.Select(o => o.ToResponse()).ToList(),
+            paged.Page,
+            paged.PageSize,
+            paged.TotalCount);
     }
 }
