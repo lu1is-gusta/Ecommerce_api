@@ -25,9 +25,21 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
       ConnectionStrings__Default: "Server=sqlserver,1433;Database=EcommerceDb;User Id=sa;Password=EcommerceApi@123;TrustServerCertificate=True;MultipleActiveResultSets=true"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
+      OTEL_SERVICE_NAME: "ecommerce-api"
     depends_on:
       sqlserver:
         condition: service_healthy
+      jaeger:
+        condition: service_started
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"   # Jaeger UI
+      - "4317:4317"     # OTLP gRPC (recebe traces da API)
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
 
 volumes:
   sqlserver_data:
