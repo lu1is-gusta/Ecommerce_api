@@ -57,6 +57,8 @@ var versionSet = app.NewApiVersionSet()
     .Build();
 
 app.MapOrderEndpoints(versionSet);
+app.MapProductEndpoints(versionSet);
+app.MapBuyerEndpoints(versionSet);
 
 if (!app.Environment.IsEnvironment("Testing"))
 {

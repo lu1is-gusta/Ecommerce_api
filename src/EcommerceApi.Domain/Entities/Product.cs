@@ -23,4 +23,15 @@ public class Product
         Name = name.Trim();
         Price = price;
     }
+
+    public void Update(string name, decimal price)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new DomainException("Product name is required.");
+        if (price <= 0)
+            throw new DomainException("Product price must be greater than zero.");
+
+        Name = name.Trim();
+        Price = price;
+    }
 }
