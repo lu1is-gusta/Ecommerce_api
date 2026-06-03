@@ -6,6 +6,8 @@ using EcommerceApi.Application.UseCases.CancelOrder;
 using EcommerceApi.Application.UseCases.CreateOrder;
 using EcommerceApi.Application.UseCases.DeleteOrder;
 using EcommerceApi.Application.UseCases.GetOrders;
+using EcommerceApi.Application.UseCases.ProcessOrder;
+using EcommerceApi.Application.UseCases.ShipOrder;
 using EcommerceApi.Application.UseCases.UpdateOrder;
 
 namespace EcommerceApi.Api.Endpoints;
@@ -44,6 +46,20 @@ public static class OrderEndpoints
             .WithSummary("Updates the items of an order (only while it has not been processed).")
             .Produces<OrderResponse>()
             .ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status422UnprocessableEntity);
+
+        group.MapPut("/{id:guid}/process", ProcessOrder)
+            .WithName("ProcessOrder")
+            .WithSummary("Processes an order (only while started).")
+            .Produces<OrderResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status422UnprocessableEntity);
+
+        group.MapPut("/{id:guid}/ship", ShipOrder)
+            .WithName("ShipOrder")
+            .WithSummary("Ships an order (only while processed).")
+            .Produces<OrderResponse>()
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status422UnprocessableEntity);
 
@@ -97,6 +113,24 @@ public static class OrderEndpoints
         CancellationToken cancellationToken)
     {
         var result = await useCase.ExecuteAsync(id, request, cancellationToken);
+        return Results.Ok(result);
+    }
+
+    private static async Task<IResult> ProcessOrder(
+        Guid id,
+        ProcessOrderUseCase useCase,
+        CancellationToken cancellationToken)
+    {
+        var result = await useCase.ExecuteAsync(id, cancellationToken);
+        return Results.Ok(result);
+    }
+
+    private static async Task<IResult> ShipOrder(
+        Guid id,
+        ShipOrderUseCase useCase,
+        CancellationToken cancellationToken)
+    {
+        var result = await useCase.ExecuteAsync(id, cancellationToken);
         return Results.Ok(result);
     }
 

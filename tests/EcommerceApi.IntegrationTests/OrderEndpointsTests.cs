@@ -104,6 +104,70 @@ public class OrderEndpointsTests : IClassFixture<EcommerceApiFactory>
     }
 
     [Fact]
+    public async Task Process_order_changes_status_to_processed()
+    {
+        var created = await (await _client.PostAsJsonAsync("/api/v1/orders", BuildCreatePayload()))
+            .Content.ReadFromJsonAsync<OrderResponse>();
+
+        var response = await _client.PutAsync($"/api/v1/orders/{created!.Id}/process", content: null);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var processed = await response.Content.ReadFromJsonAsync<OrderResponse>();
+        Assert.Equal("Processed", processed!.Status);
+    }
+
+    [Fact]
+    public async Task Process_order_that_does_not_exist_returns_404()
+    {
+        var response = await _client.PutAsync($"/api/v1/orders/{Guid.NewGuid()}/process", content: null);
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Process_already_processed_order_returns_422()
+    {
+        var created = await (await _client.PostAsJsonAsync("/api/v1/orders", BuildCreatePayload()))
+            .Content.ReadFromJsonAsync<OrderResponse>();
+
+        await _client.PutAsync($"/api/v1/orders/{created!.Id}/process", content: null);
+
+        var response = await _client.PutAsync($"/api/v1/orders/{created.Id}/process", content: null);
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Ship_order_changes_status_to_shipped()
+    {
+        var created = await (await _client.PostAsJsonAsync("/api/v1/orders", BuildCreatePayload()))
+            .Content.ReadFromJsonAsync<OrderResponse>();
+
+        await _client.PutAsync($"/api/v1/orders/{created!.Id}/process", content: null);
+
+        var response = await _client.PutAsync($"/api/v1/orders/{created.Id}/ship", content: null);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var shipped = await response.Content.ReadFromJsonAsync<OrderResponse>();
+        Assert.Equal("Shipped", shipped!.Status);
+    }
+
+    [Fact]
+    public async Task Ship_order_that_does_not_exist_returns_404()
+    {
+        var response = await _client.PutAsync($"/api/v1/orders/{Guid.NewGuid()}/ship", content: null);
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Ship_order_not_yet_processed_returns_422()
+    {
+        var created = await (await _client.PostAsJsonAsync("/api/v1/orders", BuildCreatePayload()))
+            .Content.ReadFromJsonAsync<OrderResponse>();
+
+        var response = await _client.PutAsync($"/api/v1/orders/{created!.Id}/ship", content: null);
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
+    }
+
+    [Fact]
     public async Task Delete_order_removes_it()
     {
         var created = await (await _client.PostAsJsonAsync("/api/v1/orders", BuildCreatePayload()))

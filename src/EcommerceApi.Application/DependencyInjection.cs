@@ -1,4 +1,6 @@
 using EcommerceApi.Application.UseCases.CancelOrder;
+using EcommerceApi.Application.UseCases.ProcessOrder;
+using EcommerceApi.Application.UseCases.ShipOrder;
 using EcommerceApi.Application.UseCases.CreateBuyer;
 using EcommerceApi.Application.UseCases.CreateOrder;
 using EcommerceApi.Application.UseCases.CreateProduct;
@@ -23,6 +25,8 @@ public static class DependencyInjection
         services.AddScoped<CreateOrderUseCase>();
         services.AddScoped<UpdateOrderUseCase>();
         services.AddScoped<CancelOrderUseCase>();
+        services.AddScoped<ProcessOrderUseCase>();
+        services.AddScoped<ShipOrderUseCase>();
         services.AddScoped<DeleteOrderUseCase>();
         services.AddScoped<GetOrdersUseCase>();
         services.AddScoped<GetOrderByIdUseCase>();
