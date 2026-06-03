@@ -1,6 +1,6 @@
 # Ecommerce API
 
-API RESTful de e-commerce desenvolvida com .NET 10 e Clean Architecture. Permite o gerenciamento completo de pedidos, produtos e compradores, seguindo boas práticas de arquitetura de software com foco em qualidade de código, organização e manutenibilidade.
+Desafio Técnico Backend com .NET. Foi criada uma API RESTful para  gerenciar pedidos de e-commerce.
 
 ---
 
@@ -142,7 +142,6 @@ docker compose down -v
 | `api` | `5080` | Ecommerce API |
 | `sqlserver` | `1433` | SQL Server 2022 Express |
 | `jaeger` | `16686` | Jaeger UI (tracing) |
-| `jaeger` | `4317` | Receptor OTLP gRPC (interno) |
 
 A API aguarda o SQL Server ficar saudável antes de iniciar (healthcheck configurado no `docker-compose.yml`).
 
@@ -189,7 +188,7 @@ A API envia traces via **OpenTelemetry** (protocolo OTLP) para o Jaeger. São in
 
 ### Acessar o Jaeger UI
 
-Com os serviços Docker em execução, abra no navegador:
+Com os serviços Docker em execução:
 
 ```
 http://localhost:16686
@@ -215,7 +214,7 @@ Todos os endpoints estão documentados com descrições, parâmetros, respostas 
 
 | Endpoint | Descrição |
 |---|---|
-| `GET /health/live` | Liveness check — verifica se o processo está rodando. Não depende de serviços externos. |
+| `GET /health/live` | Liveness check — verifica se o processo está rodando. |
 | `GET /health/ready` | Readiness check — verifica a conectividade com o SQL Server. Retorna `503` se o banco estiver indisponível. |
 
 ```bash
@@ -273,26 +272,10 @@ As migrations são aplicadas automaticamente ao iniciar a aplicação. Para exec
 dotnet ef database update --project src/EcommerceApi.Infrastructure --startup-project src/EcommerceApi.Api
 ```
 
-### Criar uma nova migration
-
-```bash
-dotnet ef migrations add NomeDaMigration \
-  --project src/EcommerceApi.Infrastructure \
-  --startup-project src/EcommerceApi.Api
-```
-
 ### Listar migrations existentes
 
 ```bash
 dotnet ef migrations list \
-  --project src/EcommerceApi.Infrastructure \
-  --startup-project src/EcommerceApi.Api
-```
-
-### Reverter para uma migration específica
-
-```bash
-dotnet ef database update NomeDaMigration \
   --project src/EcommerceApi.Infrastructure \
   --startup-project src/EcommerceApi.Api
 ```
@@ -315,6 +298,8 @@ dotnet ef database update NomeDaMigration \
 | `GET` | `/api/v1/orders/{id}` | Busca um pedido pelo ID |
 | `PUT` | `/api/v1/orders/{id}` | Atualiza os itens de um pedido |
 | `PUT` | `/api/v1/orders/{id}/cancel` | Cancela um pedido |
+| `PUT` | `/api/v1/orders/{id}/process` | Processa um pedido |
+| `PUT` | `/api/v1/orders/{id}/ship` | Envia um pedido |
 | `DELETE` | `/api/v1/orders/{id}` | Remove um pedido |
 
 **Filtros disponíveis em `GET /api/v1/orders`:**
@@ -343,6 +328,7 @@ Enviado (Shipped)
 - Um pedido deve ter um comprador e pelo menos um item
 - Apenas pedidos com status `Started` podem ter seus itens alterados
 - Apenas pedidos com status `Started` ou `Processed` podem ser cancelados
+- Apenas pedidos com status `Processed` podem ser enviados
 - O preço unitário dos itens é fixado no momento da criação, com base no catálogo de produtos
 
 ---
@@ -388,10 +374,3 @@ Enviado (Shipped)
 ### Tratamento de Erros
 
 A API retorna respostas no formato [RFC 9457 Problem Details](https://www.rfc-editor.org/rfc/rfc9457) para todos os erros:
-
-| Status | Situação |
-|---|---|
-| `400 Bad Request` | Falha de validação (FluentValidation) |
-| `404 Not Found` | Recurso não encontrado |
-| `422 Unprocessable Entity` | Violação de regra de domínio |
-| `500 Internal Server Error` | Erro inesperado |
